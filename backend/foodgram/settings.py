@@ -1,13 +1,18 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-v$usprw-_nlq19@0w==mffsz&n)p(ufrf()-r1hqu94*z+lahf'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['158.160.64.215', '127.0.0.1', 'localhost', 'foo0dgram.ddns.net']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(', ')
+
 
 SECURE_SSL_REDIRECT = True
 
