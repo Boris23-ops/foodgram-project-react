@@ -9,6 +9,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['158.160.64.215', '127.0.0.1', 'localhost', 'foo0dgram.ddns.net']
 
+SECURE_SSL_REDIRECT = True
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
