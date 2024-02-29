@@ -196,3 +196,12 @@ class IngredientsViewSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
     filterset_class = IngredientFilter
+
+    def get_queryset(self):
+        """Фильтр по названию ингредиента."""
+
+        queryset = Ingredient.objects.all()
+        name = self.request.query_params.get('name')
+        if name is not None:
+            queryset = queryset.filter(name__istartswith=name.lower())
+        return queryset
