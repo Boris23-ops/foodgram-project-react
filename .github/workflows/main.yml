@@ -1,6 +1,7 @@
 name: Main Foodgram workflow
 on:
   push:
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -139,15 +140,3 @@ jobs:
             sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --noinput
             sudo docker compose exec backend cp -r /app/collected_static/. /backend_static/static/
             sudo docker compose -f docker-compose.production.yml exec backend python manage.py load_ingredients
-
-  # send_message:
-  #   runs-on: ubuntu-latest
-  #   needs: deploy
-  #   steps:
-  #   - name: Send message
-  #     uses: appleboy/telegram-action@master
-  #     with:
-  #       to: ${{ secrets.TELEGRAM_TO }}
-  #       token: ${{ secrets.TELEGRAM_TOKEN }}
-  #       message: |
-  #         message: Деплой Фудграмма успешно выполнен!
