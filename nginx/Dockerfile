@@ -1,2 +1,3 @@
-FROM nginx:1.19.3
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+FROM nginx:mainline-alpine3.18
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docs /usr/share/nginx/html/api/docs
