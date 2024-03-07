@@ -1,11 +1,21 @@
 from django_filters.rest_framework import (
+    BooleanFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     NumberFilter,
     CharFilter
 )
 
-from recipes.models import Recipe, Tag, Ingredient
+from recipes.models import Ingredient, Recipe, Tag
+
+
+class IngredientsFilter(FilterSet):
+    name = CharFilter(
+        field_name='name', lookup_expr='istartswith')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
 
 
 class RecipeFilter(FilterSet):
@@ -17,7 +27,7 @@ class RecipeFilter(FilterSet):
         queryset=Tag.objects.all()
     )
     author = NumberFilter(field_name='author__id')
-    is_favorited = NumberFilter(method='is_favorited_filter')
+    is_favorited = BooleanFilter(method='is_favorited_filter')
     is_in_shopping_cart = NumberFilter(
         method='is_in_shopping_cart_filter'
     )
@@ -35,12 +45,3 @@ class RecipeFilter(FilterSet):
         if not value:
             return queryset
         return queryset.filter(shop_cart__user=self.request.user)
-
-
-class IngredientFilter(FilterSet):
-
-    name = CharFilter(field_name='name', lookup_expr='istartswith')
-
-    class Meta:
-        model = Ingredient
-        fields = ['name']

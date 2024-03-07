@@ -1,11 +1,14 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db.models import (
     CASCADE,
     CharField,
     EmailField,
     ForeignKey,
     Model,
-    UniqueConstraint
+    UniqueConstraint,
+    CheckConstraint,
+    F, Q,
 )
 
 
@@ -18,9 +21,12 @@ class User(AbstractUser):
         unique=True
     )
     username = CharField(
-        'Имя пользователя',
+        unique=True,
         max_length=150,
-        unique=True
+        verbose_name='имя пользователя',
+        validators=[
+            RegexValidator(r'^[\w.@+-]+\Z'),
+        ],
     )
     first_name = CharField(
         'Имя',
@@ -69,8 +75,12 @@ class Subscription(Model):
         ordering = ('-author_id',)
         constraints = [
             UniqueConstraint(
-                fields=['user', 'author'],
-                name='unique_following'
+                fields=('user', 'author'),
+                name='unique_subscribes'
+            ),
+            CheckConstraint(
+                check=~Q(user=F('author')),
+                name='user_cannot_follow_self'
             )
         ]
 
