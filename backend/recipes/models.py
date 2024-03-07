@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db.models import (
     CASCADE,
@@ -10,7 +11,7 @@ from django.db.models import (
     PositiveSmallIntegerField,
     SlugField,
     TextField,
-    UniqueConstraint
+    UniqueConstraint,
 )
 
 from users.models import User
@@ -24,10 +25,9 @@ class Tag(Model):
         max_length=200,
         unique=True,
     )
-    color = CharField(
-        'Цвет',
-        max_length=10,
-        blank=True,
+    color = ColorField(
+        verbose_name='цвет',
+        format='hex',
     )
     slug = SlugField(
         'Слаг тега',
@@ -38,6 +38,12 @@ class Tag(Model):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
         ordering = ('name',)
+        constraints = [
+            UniqueConstraint(
+                fields=['name', 'color'],
+                name='unique_tag'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -58,7 +64,11 @@ class Ingredient(Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        ordering = ('name',)
+        constraints = [
+            UniqueConstraint(
+                fields=('name', 'measurement_unit',),
+                name='unique_ingredient_fields',),
+        ]
 
     def __str__(self):
         return self.name
@@ -166,16 +176,12 @@ class ShoppingCart(FavoritesShopCart):
         default_related_name = 'shop_cart'
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
-        ordering = ('recipe_id',)
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_shopping_cart_recipe'
             )
         ]
-
-    def __str__(self):
-        return f'{self.recipe}'
 
 
 class TagsRecipe(Model):
@@ -229,6 +235,11 @@ class IngredientRecipe(Model):
         verbose_name = 'Ингридиент в рецепте'
         verbose_name_plural = 'Ингридиенты в рецепте'
         ordering = ('ingredient__name',)
+        constraints = [
+            UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_ingredients_recipe')
+        ]
 
     def __str__(self):
         return f'{self.ingredient} в {self.recipe}: {self.amount}'

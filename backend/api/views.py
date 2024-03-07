@@ -5,7 +5,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import (
-    AllowAny,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
@@ -47,8 +46,9 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.prefetch_related(
         'recipe__ingredient', 'tags'
     ).select_related('author').order_by('-pub_date')
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
+    permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = Pagination
+    serializer_class = CreateRecipeSerializer
     filterset_class = RecipeFilter
     filter_backends = (DjangoFilterBackend,)
 
@@ -201,7 +201,6 @@ class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    permission_classes = (AllowAny, )
     pagination_class = None
 
 

@@ -169,17 +169,13 @@ class CreateRecipeSerializer(ModelSerializer):
         """Обновление рецепта."""
 
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredient')
-        instance = super().update(instance, validated_data)
+        ingredients = validated_data.pop('ingredients')
         instance.tags.clear()
-        instance.ingredient.clear()
-        instance.name = super().update(instance, validated_data)
-        instance.text = validated_data.get('text')
-        instance.cooking_time = validated_data.get('cooking_time')
-        instance.save()
-        self.ingredient_recipe_bulk_create(ingredients, instance)
         instance.tags.set(tags)
-        return instance
+        instance.ingredients.clear()
+
+        self._make_recipe(ingredients, instance)
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return ReadRecipeSerializer(instance, context=self.context).data
@@ -220,14 +216,14 @@ class ReadRecipeSerializer(ModelSerializer):
         """Получение информации о добавлении рецепта в избранное."""
 
         user = self.context.get('request').user
-        return user.is_authenticated or user.favorites.filter(
+        return user.is_authenticated and user.favorites.filter(
             recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Получение информации о добавлении рецепта в список покупок."""
 
         user = self.context.get('request').user
-        return user.is_authenticated or user.shop_cart.filter(
+        return user.is_authenticated and user.shop_cart.filter(
             recipe=obj).exists()
 
 
