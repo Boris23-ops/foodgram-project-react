@@ -1,4 +1,4 @@
-from django.db.models import Count, Sum
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -27,7 +27,6 @@ from api.serializers import (
     TagSerializer,
     UserSerializer,
     SubscriptionSerializer,
-    ShortCutRecipeSerializer
 )
 from api.pagination import Pagination
 from recipes.models import (
@@ -86,14 +85,17 @@ class RecipeViewSet(ModelViewSet):
         return Response(status=HTTP_204_NO_CONTENT)
 
     @action(
-        methods=['post', 'delete'],
+        methods=('post', 'delete'),
         url_path='favorite',
         detail=True,
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk=None):
-        """Добавление или удаление рецепта из избранного."""
-        return self.delete_from_base(request, FavoriteRecipe, pk)
+        """Экшн для добавления/удаления рецепта из избранного."""
+
+        if request.method == 'POST':
+            return self.add_to_base(request, FavoriteRecipe, pk)
+        return self.delete_from_base(request.user, FavoriteRecipe, pk)
 
     @action(
         methods=('post', 'delete'),
@@ -102,8 +104,11 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk=None):
-        """Добавление или удаление рецепта из списка покупок."""
-        return self.delete_from_base(request, ShoppingCart, pk)
+        """Экшн для добавления/удаления рецепта из списка покупок."""
+
+        if request.method == 'POST':
+            return self.add_to_base(request, ShoppingCart, pk)
+        return self.delete_from_base(request.user, ShoppingCart, pk)
 
     def generate_shopping_cart_list(self, user):
         """Генерация списка покупок."""

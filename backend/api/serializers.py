@@ -10,10 +10,8 @@ from rest_framework.serializers import (
     SerializerMethodField,
     ValidationError
 )
-from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
-from users.models import Subscription
 from foodgram.constants import MIN_VALUE, MAX_VALUE
 
 User = get_user_model()
@@ -62,7 +60,7 @@ class UserSerializer(ModelSerializer):
         user = self.context.get('request').user
         if not user.is_authenticated:
             return False
-        return Subscription.objects.filter(user=user, author=obj.id).exists()
+        return user.follower.filter(author=obj.id).exists()
 
 
 class TagSerializer(ModelSerializer):
@@ -222,15 +220,17 @@ class ReadRecipeSerializer(ModelSerializer):
         """Получение информации о добавлении рецепта в избранное."""
 
         user = self.context.get('request').user
-        return user.is_authenticated and user.favorites.filter(
-            recipe=obj).exists()
+        if not user.is_authenticated:
+            return False
+        return user.favorites.filter(recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Получение информации о добавлении рецепта в список покупок."""
 
         user = self.context.get('request').user
-        return user.is_authenticated and user.shop_cart.filter(
-            recipe=obj).exists()
+        if not user.is_authenticated:
+            return False
+        return user.shop_cart.filter(recipe=obj).exists()
 
 
 class FavoriteRecipeSerializer(ModelSerializer):
@@ -252,6 +252,7 @@ class ShortCutRecipeSerializer(ModelSerializer):
 
 class SubscriptionSerializer(UserSerializer):
     """Сериализатор подписок"""
+
     recipes = SerializerMethodField(method_name='get_recipe')
     recipes_count = SerializerMethodField(
         method_name='get_recipes_count'
