@@ -12,7 +12,7 @@ from rest_framework.serializers import (
 )
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag, ShoppingCart, FavoriteRecipe
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from users.models import Subscription
 from foodgram.constants import MIN_VALUE, MAX_VALUE
 
@@ -207,8 +207,8 @@ class ReadRecipeSerializer(ModelSerializer):
         many=True, read_only=True, source='recipe'
     )
     tags = TagSerializer(many=True, read_only=True)
-    is_favorited = SerializerMethodField(method_name='get_favorited')
-    is_in_shopping_cart = SerializerMethodField(method_name='get_shopping_cart')
+    is_favorited = SerializerMethodField(read_only=True)
+    is_in_shopping_cart = SerializerMethodField(read_only=True)
     text = CharField(source='description')
 
     class Meta:
@@ -218,20 +218,19 @@ class ReadRecipeSerializer(ModelSerializer):
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
 
-    def get_favorited(self, obj):
-        request = self.context.get('request')
-        if request and not request.user.is_anonymous:
-            return FavoriteRecipe.objects.filter(
-                user=request.user,
-                recipe=obj).exists()
-        return False
+    def get_is_favorited(self, obj):
+        """Получение информации о добавлении рецепта в избранное."""
 
-    def get_shopping_cart(self, obj):
-        request = self.context.get('request')
-        if request and not request.user.is_anonymous:
-            return ShoppingCart.objects.filter(user=request.user,
-                                               recipe=obj).exists()
-        return False
+        user = self.context.get('request').user
+        return user.is_authenticated and user.favorites.filter(
+            recipe=obj).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        """Получение информации о добавлении рецепта в список покупок."""
+
+        user = self.context.get('request').user
+        return user.is_authenticated and user.shop_cart.filter(
+            recipe=obj).exists()
 
 
 class FavoriteRecipeSerializer(ModelSerializer):

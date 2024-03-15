@@ -85,34 +85,25 @@ class RecipeViewSet(ModelViewSet):
         databse_obj.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post', 'delete'])
-    def favorite(self, request, **kwargs):
-        if request.method == 'POST':
-            return self.add_recipe_to_list(
-                request,
-                FavoriteRecipe,
-                FavoriteRecipeSerializer
-            )
-        elif request.method == 'DELETE':
-            return self.remove_recipe_from_list(
-                request,
-                FavoriteRecipe
-            )
+    @action(
+        methods=['post', 'delete'],
+        url_path='favorite',
+        detail=True,
+        permission_classes=[IsAuthenticated]
+    )
+    def favorite(self, request, pk=None):
+        """Добавление или удаление рецепта из избранного."""
+        return self.delete_from_base(request, FavoriteRecipe, pk)
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=(IsAuthenticated,))
-    def shopping_cart(self, request, **kwargs):
-        if request.method == 'POST':
-            return self.add_recipe_to_list(
-                request,
-                ShoppingCart,
-                ShortCutRecipeSerializer
-            )
-        elif request.method == 'DELETE':
-            return self.remove_recipe_from_list(
-                request,
-                ShoppingCart
-            )
+    @action(
+        methods=('post', 'delete'),
+        url_path='shopping_cart',
+        detail=True,
+        permission_classes=(IsAuthenticated,)
+    )
+    def shopping_cart(self, request, pk=None):
+        """Добавление или удаление рецепта из списка покупок."""
+        return self.delete_from_base(request, ShoppingCart, pk)
 
     def generate_shopping_cart_list(self, user):
         """Генерация списка покупок."""
