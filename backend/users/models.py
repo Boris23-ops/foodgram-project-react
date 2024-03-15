@@ -11,18 +11,24 @@ from django.db.models import (
     F, Q,
 )
 
+from foodgram.constants import (
+    MAX_EMAIL_LENGTH,
+    MAX_USERNAME_LENGTH,
+    MAX_NAME_LENGTH,
+    MAX_PASSWORD_LENGTH,
+)
+
 
 class User(AbstractUser):
     """Модель пользователя."""
-
     email = EmailField(
         'Электронная почта',
-        max_length=254,
+        max_length=MAX_EMAIL_LENGTH,
         unique=True
     )
     username = CharField(
         unique=True,
-        max_length=150,
+        max_length=MAX_USERNAME_LENGTH,
         verbose_name='имя пользователя',
         validators=[
             RegexValidator(r'^[\w.@+-]+\Z'),
@@ -30,15 +36,15 @@ class User(AbstractUser):
     )
     first_name = CharField(
         'Имя',
-        max_length=150
+        max_length=MAX_NAME_LENGTH
     )
     last_name = CharField(
         'Фамилия',
-        max_length=150
+        max_length=MAX_NAME_LENGTH
     )
     password = CharField(
         'Пароль',
-        max_length=150
+        max_length=MAX_PASSWORD_LENGTH
     )
 
     USERNAME_FIELD = 'email'
@@ -80,7 +86,7 @@ class Subscription(Model):
             ),
             CheckConstraint(
                 check=~Q(user=F('author')),
-                name='user_cannot_follow_self'
+                name='check_different_users'
             )
         ]
 

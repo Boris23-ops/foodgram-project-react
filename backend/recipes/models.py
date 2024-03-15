@@ -1,5 +1,8 @@
 from colorfield.fields import ColorField
-from django.core.validators import MinValueValidator
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator
+)
 from django.db.models import (
     CASCADE,
     CharField,
@@ -15,6 +18,14 @@ from django.db.models import (
 )
 
 from users.models import User
+from foodgram.constants import (
+    MAX_NAME_LENGTH_TAG,
+    MAX_NAME_LENGTH_INGREDIENT,
+    MAX_NAME_LENGTH_RECIPE,
+    MAX_SLUG_LENGTH,
+    MIN_VALUE,
+    MAX_VALUE,
+)
 
 
 class Tag(Model):
@@ -22,12 +33,12 @@ class Tag(Model):
 
     name = CharField(
         'Тег',
-        max_length=200,
+        max_length=MAX_NAME_LENGTH_TAG,
         unique=True,
     )
     color = ColorField(
-        verbose_name='цвет',
-        format='hex',
+        'Цвет',
+        format='hex'
     )
     slug = SlugField(
         'Слаг тега',
@@ -54,11 +65,11 @@ class Ingredient(Model):
 
     name = CharField(
         'Название ингридиента',
-        max_length=200
+        max_length=MAX_NAME_LENGTH_INGREDIENT,
     )
     measurement_unit = CharField(
         'Единица измерения',
-        max_length=50
+        max_length=MAX_SLUG_LENGTH
     )
 
     class Meta:
@@ -85,7 +96,7 @@ class Recipe(Model):
     )
     name = CharField(
         'Название рецепта',
-        max_length=200
+        max_length=MAX_NAME_LENGTH_RECIPE,
     )
     image = ImageField(
         'Картинка',
@@ -94,7 +105,7 @@ class Recipe(Model):
     description = TextField(
         'Описание рецепта',
     )
-    ingredient = ManyToManyField(
+    ingredients = ManyToManyField(
         Ingredient,
         verbose_name='Ингредиенты',
         through='IngredientRecipe',
@@ -108,8 +119,15 @@ class Recipe(Model):
         verbose_name='Время готовки',
         validators=[
             MinValueValidator(
-                1, message='Время готовки не может быть меньше 1 минуты'
-            )
+                MIN_VALUE,
+                message='Время готовки не может '
+                f'быть меньше {MIN_VALUE} минуты'
+            ),
+            MaxValueValidator(
+                MAX_VALUE,
+                message='Время готовки не может '
+                f'быть больше {MAX_VALUE} минуты'
+            ),
         ]
     )
     pub_date = DateTimeField(
@@ -121,12 +139,6 @@ class Recipe(Model):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ('-pub_date',)
-        constraints = [
-            UniqueConstraint(
-                fields=['author', 'name'],
-                name='unique_recipe_by_author'
-            )
-        ]
 
     def __str__(self) -> str:
         return self.name
@@ -226,7 +238,14 @@ class IngredientRecipe(Model):
         verbose_name='Количество',
         validators=[
             MinValueValidator(
-                1, message='Количество ингредиентов не может быть меньше 1'
+                MIN_VALUE,
+                message='Количество ингредиентов '
+                f'не может быть меньше {MIN_VALUE}'
+            ),
+            MaxValueValidator(
+                MAX_VALUE,
+                message='Количество ингредиентов '
+                f'не может быть больше {MAX_VALUE}'
             )
         ]
     )
