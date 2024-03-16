@@ -170,8 +170,8 @@ docker-compose exec backend python manage.py collectstatic --no-input
 
 ### Заполните базу тестовыми данными:
 ```bash
-docker-compose exec backend python manage.py add_tags_from_data
-docker-compose exec backend python manage.py add_ingidients_from_data   
+docker-compose exec backend python manage.py load_ingredients
+docker-compose exec backend python manage.py load_tags   
 ```
 
 ### Автор:  
