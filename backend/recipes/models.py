@@ -19,10 +19,10 @@ from django.db.models import (
 
 from users.models import User
 from foodgram.constants import (
+    INGREGIENT_MEASUREMENT_UNIT_NAME_MAX_LENGTH,
     MAX_NAME_LENGTH_TAG,
     MAX_NAME_LENGTH_INGREDIENT,
     MAX_NAME_LENGTH_RECIPE,
-    MAX_SLUG_LENGTH,
     MIN_VALUE,
     MAX_VALUE,
 )
@@ -69,7 +69,7 @@ class Ingredient(Model):
     )
     measurement_unit = CharField(
         'Единица измерения',
-        max_length=MAX_SLUG_LENGTH
+        max_length=INGREGIENT_MEASUREMENT_UNIT_NAME_MAX_LENGTH
     )
 
     class Meta:
