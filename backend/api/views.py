@@ -59,8 +59,17 @@ class RecipeViewSet(ModelViewSet):
 
     def add_to_base(self, request, model, pk):
         """Добавление рецепта в базу."""
-
+        if not Recipe.objects.filter(pk=pk).exists():
+            return Response(
+                {'error': 'Рецепт не найден.'},
+                status=HTTP_400_BAD_REQUEST
+            )
         recipe = get_object_or_404(Recipe, pk=pk)
+        if model.objects.filter(recipe=recipe, user=request.user).exists():
+            return Response(
+                {'error': 'Рецепт уже добавлен в корзину.'},
+                status=HTTP_400_BAD_REQUEST
+            )
         created = model.objects.get_or_create(
             recipe=recipe, user=request.user
         )
@@ -70,44 +79,47 @@ class RecipeViewSet(ModelViewSet):
                 context={'request': request}
             )
             return Response(serializer.data, status=HTTP_201_CREATED)
-        return Response(status=HTTP_400_BAD_REQUEST)
+        return Response(
+            {'errors': 'Не удалось добавить рецепт в базу.'},
+            status=HTTP_400_BAD_REQUEST
+        )
 
     def delete_from_base(self, user, model, pk):
         """Удаление рецепта из базы."""
-
         recipe = get_object_or_404(Recipe, pk=pk)
-        databse_obj = model.objects.filter(
+        database_obj = model.objects.filter(
             user=user, recipe=recipe
         )
-        if not databse_obj.exists():
-            return Response(status=HTTP_400_BAD_REQUEST)
-        databse_obj.delete()
+        if not database_obj.exists():
+            return Response(
+                {'errors': 'Рецепт не найден в базе.'},
+                status=HTTP_400_BAD_REQUEST
+            )
+        database_obj.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
     @action(
-        methods=('post', 'delete'),
-        url_path='favorite',
+        methods=['post', 'delete'],
         detail=True,
-        permission_classes=(IsAuthenticated,)
+        url_path='favorite',
+        permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk=None):
-        """Экшн для добавления/удаления рецепта из избранного."""
-
+        """Экшн для добавления или удаления рецепта из избранного."""
         if request.method == 'POST':
             return self.add_to_base(request, FavoriteRecipe, pk)
         return self.delete_from_base(request.user, FavoriteRecipe, pk)
 
     @action(
-        methods=('post', 'delete'),
-        url_path='shopping_cart',
+        methods=['post', 'delete'],
         detail=True,
-        permission_classes=(IsAuthenticated,)
+        url_path='shopping_cart',
+        permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, pk=None):
-        """Экшн для добавления/удаления рецепта из списка покупок."""
-
+        """Экшн для добавления или удаления рецепта из списка покупок."""
         if request.method == 'POST':
-            return self.add_to_base(request, ShoppingCart, pk)
+            return self.add_to_base(request, ShoppingCart, pk,)
         return self.delete_from_base(request.user, ShoppingCart, pk)
 
     def generate_shopping_cart_list(self, user):

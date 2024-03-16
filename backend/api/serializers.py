@@ -10,7 +10,6 @@ from rest_framework.serializers import (
     SerializerMethodField,
     ValidationError
 )
-
 from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from foodgram.constants import MIN_VALUE, MAX_VALUE
 
@@ -238,7 +237,7 @@ class FavoriteRecipeSerializer(ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ('id', 'name', 'image', 'cooking_time',)
 
 
 class ShortCutRecipeSerializer(ModelSerializer):
