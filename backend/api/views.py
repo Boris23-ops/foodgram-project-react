@@ -102,7 +102,7 @@ class RecipeViewSet(ModelViewSet):
         methods=['post', 'delete'],
         detail=True,
         url_path='favorite',
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated)
     )
     def favorite(self, request, pk=None):
         """Экшн для добавления или удаления рецепта из избранного."""
@@ -114,7 +114,7 @@ class RecipeViewSet(ModelViewSet):
         methods=['post', 'delete'],
         detail=True,
         url_path='shopping_cart',
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated)
     )
     def shopping_cart(self, request, pk=None):
         """Экшн для добавления или удаления рецепта из списка покупок."""
@@ -165,8 +165,11 @@ class CustomUserViewSet(UserViewSet):
             return (IsAuthenticated(),)
         return super().get_permissions()
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=(IsAuthenticated,)
+    )
     def subscribe(self, request, id):
         user = request.user
         author = get_object_or_404(User, id=id)
@@ -193,7 +196,10 @@ class CustomUserViewSet(UserViewSet):
                              'Вы не подписаны на этого пользователя'},
                             status=HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, permission_classes=(IsAuthenticated,))
+    @action(
+        detail=False,
+        permission_classes=(IsAuthenticated,)
+    )
     def subscriptions(self, request):
         user = request.user
         follows = User.objects.filter(following__user=user)
