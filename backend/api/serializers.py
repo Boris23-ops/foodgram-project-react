@@ -1,6 +1,4 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer
-from drf_extra_fields.fields import Base64ImageField
 from rest_framework.serializers import (
     CharField,
     IntegerField,
@@ -10,6 +8,10 @@ from rest_framework.serializers import (
     SerializerMethodField,
     ValidationError
 )
+
+from djoser.serializers import UserCreateSerializer
+from drf_extra_fields.fields import Base64ImageField
+
 from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from foodgram.constants import MIN_VALUE, MAX_VALUE
 
@@ -35,7 +37,7 @@ class SetPasswordSerializer(ModelSerializer):
         fields = ('current_password', 'new_password')
 
     def validate_current_password(self, value):
-        user = self.context['request'].user
+        user = self.context.get('request').user
         if not user.check_password(value):
             raise ValidationError('Неверный текущий пароль')
         return value
@@ -57,9 +59,9 @@ class UserSerializer(ModelSerializer):
         """Получение информации о подписке."""
 
         user = self.context.get('request').user
-        if not user.is_authenticated:
-            return False
-        return user.follower.filter(author=obj.id).exists()
+        return user.is_authenticated and user.follower.filter(
+            author=obj.id
+        ).exists()
 
 
 class TagSerializer(ModelSerializer):
@@ -145,17 +147,14 @@ class CreateRecipeSerializer(ModelSerializer):
 
     def ingredient_recipe_bulk_create(self, ingredients, recipe):
         """Создание ингредиентов рецепта."""
-        ingredient_instances = []
-        for ingredient_data in ingredients:
-            ingredient_id = ingredient_data['id']
-            ingredient = Ingredient.objects.get(pk=ingredient_id)
-            ingredient_instances.append(
-                IngredientRecipe(
-                    recipe=recipe,
-                    ingredient=ingredient,
-                    amount=ingredient_data['amount']
-                )
+        ingredient_instances = [
+            IngredientRecipe(
+                recipe=recipe,
+                ingredient=Ingredient.objects.get(pk=ingredient_data['id']),
+                amount=ingredient_data['amount']
             )
+            for ingredient_data in ingredients
+        ]
         IngredientRecipe.objects.bulk_create(ingredient_instances)
 
     def create(self, validated_data):
@@ -217,19 +216,17 @@ class ReadRecipeSerializer(ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Получение информации о добавлении рецепта в избранное."""
-
         user = self.context.get('request').user
-        if not user.is_authenticated:
-            return False
-        return user.favorites.filter(recipe=obj).exists()
+        return user.is_authenticated and user.favorites.filter(
+            recipe=obj
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Получение информации о добавлении рецепта в список покупок."""
-
         user = self.context.get('request').user
-        if not user.is_authenticated:
-            return False
-        return user.shop_cart.filter(recipe=obj).exists()
+        return user.is_authenticated and user.shop_cart.filter(
+            recipe=obj
+        ).exists()
 
 
 class FavoriteRecipeSerializer(ModelSerializer):
