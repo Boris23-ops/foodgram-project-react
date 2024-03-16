@@ -70,3 +70,4 @@ reportlab==3.6.1
 xhtml2pdf==0.2.4
 django-cors-headers==3.13.0
 django-colorfield==0.11.0
+tqdm==4.66.2
