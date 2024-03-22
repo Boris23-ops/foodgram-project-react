@@ -86,7 +86,7 @@ class Subscription(Model):
             ),
             CheckConstraint(
                 check=~Q(user=F('author')),
-                name='check_different_users'
+                name='self_subscription',
             )
         ]
 

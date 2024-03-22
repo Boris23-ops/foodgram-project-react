@@ -1,31 +1,15 @@
 from colorfield.fields import ColorField
-from django.core.validators import (
-    MinValueValidator,
-    MaxValueValidator
-)
-from django.db.models import (
-    CASCADE,
-    CharField,
-    DateTimeField,
-    ForeignKey,
-    ImageField,
-    ManyToManyField,
-    Model,
-    PositiveSmallIntegerField,
-    SlugField,
-    TextField,
-    UniqueConstraint,
-)
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
+                              ImageField, ManyToManyField, Model,
+                              PositiveSmallIntegerField, SlugField, TextField,
+                              UniqueConstraint)
 
+from foodgram.constants import (INGREGIENT_MEASUREMENT_UNIT_NAME_MAX_LENGTH,
+                                MAX_NAME_LENGTH_INGREDIENT,
+                                MAX_NAME_LENGTH_RECIPE, MAX_NAME_LENGTH_TAG,
+                                MAX_VALUE, MIN_VALUE)
 from users.models import User
-from foodgram.constants import (
-    INGREGIENT_MEASUREMENT_UNIT_NAME_MAX_LENGTH,
-    MAX_NAME_LENGTH_TAG,
-    MAX_NAME_LENGTH_INGREDIENT,
-    MAX_NAME_LENGTH_RECIPE,
-    MIN_VALUE,
-    MAX_VALUE,
-)
 
 
 class Tag(Model):
@@ -38,7 +22,8 @@ class Tag(Model):
     )
     color = ColorField(
         'Цвет',
-        format='hex'
+        format='hex',
+        unique=True,
     )
     slug = SlugField(
         'Слаг тега',
@@ -51,7 +36,7 @@ class Tag(Model):
         ordering = ('name',)
         constraints = [
             UniqueConstraint(
-                fields=['name', 'color'],
+                fields=['color'],
                 name='unique_tag'
             )
         ]
@@ -160,6 +145,10 @@ class FavoritesShopCart(Model):
 
     class Meta:
         abstract = True
+        ordering = ('recipe_id',)
+
+    def __str__(self):
+        return f'{self.recipe} - {self.user}'
 
 
 class FavoriteRecipe(FavoritesShopCart):
@@ -169,16 +158,12 @@ class FavoriteRecipe(FavoritesShopCart):
         default_related_name = 'favorites'
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
-        ordering = ('recipe_id',)
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_favorite_recipe'
             )
         ]
-
-    def __str__(self):
-        return f'{self.recipe}'
 
 
 class ShoppingCart(FavoritesShopCart):
@@ -216,7 +201,7 @@ class TagsRecipe(Model):
         ordering = ('recipe__name',)
 
     def __str__(self):
-        return f'{self.tag}'
+        return f'{self.tag.name} - {self.recipe.name}'
 
 
 class IngredientRecipe(Model):
