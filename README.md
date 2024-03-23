@@ -4,6 +4,7 @@ _
 ## api_Foodgram
 Пример запущенного сервиса: 
 [foo0dgram.ddns.net](https://foo0dgram.ddns.net)
+Документация по адресу:(https://foo0dgram.ddns.net/api/docs/redoc.html)
 
 ### Описание проекта
 Проект API и готового фронтенда системы публикации кулинарных рецептов.
