@@ -1,10 +1,10 @@
 # Foodgram
-![Workflow](https://github.com/Boris23-ops/kittygram_final/actions/workflows/main.yml/badge.svg)
+![Workflow](https://github.com/Boris23-ops/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 _
 ## api_Foodgram
 Пример запущенного сервиса: 
 [foo0dgram.ddns.net](https://foo0dgram.ddns.net)
-Документация по адресу:(https://foo0dgram.ddns.net/api/docs/redoc.html)
+Документация по адресу:(https://foo0dgram.ddns.net/api/docs/)
 
 ### Описание проекта
 Проект API и готового фронтенда системы публикации кулинарных рецептов.
