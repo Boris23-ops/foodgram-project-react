@@ -298,6 +298,8 @@ class SubscriptionCreateSerializer(ModelSerializer):
 
 
 class BaseRecipeSerializer(ModelSerializer):
+    """Базовый сериализатор для избранных рецептов и списка покупок."""
+
     class Meta:
         abstract = True
         model = None
@@ -325,10 +327,14 @@ class BaseRecipeSerializer(ModelSerializer):
 
 
 class ShoppingCartSerializer(BaseRecipeSerializer):
+    """Сериализатор списка покупок."""
+
     class Meta(BaseRecipeSerializer.Meta):
         model = ShoppingCart
 
 
 class FavoriteRecipeSerializer(BaseRecipeSerializer):
+    """Сериализатор избранных рецептов."""
+
     class Meta(BaseRecipeSerializer.Meta):
         model = FavoriteRecipe
