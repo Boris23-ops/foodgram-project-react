@@ -120,7 +120,7 @@ class RecipeViewSet(ModelViewSet):
         return response
 
 
-class CustomUserViewSet(UserViewSet):
+class UserViewSet(UserViewSet):
     """Вьюсет пользователя."""
 
     queryset = User.objects.all()
@@ -178,7 +178,8 @@ class CustomUserViewSet(UserViewSet):
         page = self.paginate_queryset(follows)
         serializer = SubscriptionSerializer(
             page, many=True,
-            context={'request': request})
+            context={'request': request}
+        )
         return self.get_paginated_response(serializer.data)
 
 
@@ -187,7 +188,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
     pagination_class = None
 
 

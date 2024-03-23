@@ -34,12 +34,6 @@ class Tag(Model):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
         ordering = ('name',)
-        constraints = [
-            UniqueConstraint(
-                fields=['color'],
-                name='unique_tag'
-            )
-        ]
 
     def __str__(self):
         return self.name
@@ -154,7 +148,7 @@ class FavoritesShopCart(Model):
 class FavoriteRecipe(FavoritesShopCart):
     """Модель избранных рецептов."""
 
-    class Meta:
+    class Meta(FavoritesShopCart.Meta):
         default_related_name = 'favorites'
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
@@ -169,7 +163,7 @@ class FavoriteRecipe(FavoritesShopCart):
 class ShoppingCart(FavoritesShopCart):
     """Модель списка покупок."""
 
-    class Meta:
+    class Meta(FavoritesShopCart.Meta):
         default_related_name = 'shop_cart'
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'

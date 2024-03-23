@@ -251,15 +251,13 @@ class SubscriptionSerializer(UserSerializer):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
         recipes = obj.recipes.all()
-        if limit:
-            try:
-                limit_int = int(limit)
-                recipes = recipes[:limit_int]
-            except ValueError:
-                raise ValidationError(
-                    'Значение recipes_limit должно быть целым числом.'
-                )
-        serialized_recipes = ShortCutRecipeSerializer(recipes, many=True).data
+        if limit and limit.isdigit():
+            recipes = recipes[:int(limit)]
+        serialized_recipes = ShortCutRecipeSerializer(
+            recipes,
+            many=True,
+            context=self.context
+        ).data
         return serialized_recipes
 
     def get_recipes_count(self, obj):
@@ -267,6 +265,7 @@ class SubscriptionSerializer(UserSerializer):
 
 
 class SubscriptionCreateSerializer(ModelSerializer):
+    '''Сериализатор для создания подписки.'''
 
     class Meta:
         model = Subscription
@@ -320,7 +319,9 @@ class BaseRecipeSerializer(ModelSerializer):
         return attrs
 
     def to_representation(self, instance):
-        return ShortCutRecipeSerializer(instance.recipe).data
+        return ShortCutRecipeSerializer(
+            instance.recipe, context=self.context
+        ).data
 
 
 class ShoppingCartSerializer(BaseRecipeSerializer):
